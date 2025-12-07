@@ -1,0 +1,288 @@
+- id: Import-CSV_1
+  inputs: {}
+  operationId: Import CSV
+  parameters:
+    filename: UPLOAD$/7fb02433c77e37d9b0462f0d507a5491.hypo_telco_vertices.csv
+    imported_table: a72a8aee-d7b3-3096-b8d9-90c2bd9c2257
+    infer: yes
+    last_settings: |-
+      {
+        "sql" : "",
+        "infer" : "yes",
+        "timestamp_format" : "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+        "quote" : "\"",
+        "imported_columns" : "",
+        "null_value" : "",
+        "escape" : "\\",
+        "columns" : "",
+        "filename" : "UPLOAD$/7fb02433c77e37d9b0462f0d507a5491.hypo_telco_vertices.csv",
+        "comment" : "",
+        "ignore_trailing_white_space" : "no",
+        "ignore_leading_white_space" : "no",
+        "date_format" : "yyyy-MM-dd",
+        "error_handling" : "FAILFAST",
+        "limit" : "",
+        "delimiter" : ","
+      }
+  parametricParameters: {}
+  x: -44.1217544571311
+  y: 188.74657843147833
+- id: Use-table-as-vertices_1
+  inputs:
+    table:
+      boxId: Import-CSV_1
+      id: table
+  operationId: Use table as vertices
+  parameters: {}
+  parametricParameters: {}
+  x: 205.8782455428689
+  y: 188.74657843147833
+- id: Derive-vertex-attribute_1
+  inputs:
+    graph:
+      boxId: Use-table-as-vertices_1
+      id: graph
+  operationId: Derive vertex attribute
+  parameters:
+    expr: |-
+      gender match {
+        case "Male"=> -1 
+        case "Female"=>1
+      }
+    output: gender_feature
+    persist: 'false'
+  parametricParameters: {}
+  x: 455.8782455428689
+  y: 188.74657843147833
+- id: Split-to-train-and-test-set_1
+  inputs:
+    graph:
+      boxId: Derive-vertex-attribute_1
+      id: graph
+  operationId: Split to train and test set
+  parameters: {}
+  parametricParameters: {}
+  x: 655.8782455428689
+  y: 188.74657843147833
+- id: Train-linear-regression-model_1
+  inputs:
+    graph:
+      boxId: Split-to-train-and-test-set_1
+      id: graph
+  operationId: Train linear regression model
+  parameters:
+    features: data_usage,gender_feature
+    label: age_train
+  parametricParameters: {}
+  x: 905.8782455428689
+  y: 188.74657843147833
+- id: Predict-with-model_1
+  inputs:
+    graph:
+      boxId: Train-linear-regression-model_1
+      id: graph
+  operationId: Predict with model
+  parameters:
+    name: age_prediction
+  parametricParameters: {}
+  x: 1155.8782455428689
+  y: 188.74657843147833
+- id: SQL1_1
+  inputs:
+    input:
+      boxId: Predict-with-model_1
+      id: graph
+  operationId: SQL1
+  parameters:
+    sql: |
+      select sqrt(avg(power(age_test - age_prediction,2))) as RMSE from vertices
+  parametricParameters: {}
+  x: 1355.8782455428689
+  y: 188.74657843147833
+- id: Import-CSV_2
+  inputs: {}
+  operationId: Import CSV
+  parameters:
+    filename: UPLOAD$/8c50f368939479d81876af150e4dbbdd.hypo_telco_edges.csv
+    imported_table: 24a571eb-8d7e-37e8-acf5-c0b92bafa083
+    infer: yes
+    last_settings: |-
+      {
+        "sql" : "",
+        "infer" : "yes",
+        "timestamp_format" : "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+        "quote" : "\"",
+        "imported_columns" : "",
+        "null_value" : "",
+        "escape" : "\\",
+        "columns" : "",
+        "filename" : "UPLOAD$/8c50f368939479d81876af150e4dbbdd.hypo_telco_edges.csv",
+        "comment" : "",
+        "ignore_trailing_white_space" : "no",
+        "ignore_leading_white_space" : "no",
+        "date_format" : "yyyy-MM-dd",
+        "error_handling" : "FAILFAST",
+        "limit" : "",
+        "delimiter" : ","
+      }
+  parametricParameters: {}
+  x: 473.57584968169033
+  y: 506.9896514890412
+- id: Use-table-as-edges_1
+  inputs:
+    graph:
+      boxId: Split-to-train-and-test-set_1
+      id: graph
+    table:
+      boxId: Import-CSV_2
+      id: table
+  operationId: Use table as edges
+  parameters:
+    attr: name
+    dst: callee
+    src: caller
+  parametricParameters: {}
+  x: 844.6574402131321
+  y: 395.66517432960876
+- id: Graph-visualization_1
+  inputs:
+    graph:
+      boxId: Use-table-as-edges_1
+      id: graph
+  operationId: Graph visualization
+  parameters:
+    state: >-
+      {"left":{"projectPath":"","graphMode":"sampled","display":"svg","filters":{"vertex":{},"edge":{}},"bucketCount":4,"preciseBucketSizes":false,"relativeEdgeDensity":false,"axisOptions":{"vertex":{},"edge":{}},"sampleRadius":1,"attributeTitles":{"label":"name"},"animate":{"enabled":false,"style":"expand","labelAttraction":0},"centers":["auto"],"customVisualizationFilters":false,"vertexColorMap":"Viridis","labelColorMap":"Viridis","edgeColorMap":"Viridis","sliderColorMap":"Blue
+      to
+      orange"},"right":{"display":"svg","filters":{"vertex":{},"edge":{}},"bucketCount":4,"preciseBucketSizes":false,"relativeEdgeDensity":false,"axisOptions":{"vertex":{},"edge":{}},"sampleRadius":1,"attributeTitles":{},"animate":{"enabled":false,"style":"expand","labelAttraction":0},"centers":["auto"],"customVisualizationFilters":false,"vertexColorMap":"Viridis","labelColorMap":"Viridis","edgeColorMap":"Viridis","sliderColorMap":"Blue
+      to orange"}}
+  parametricParameters: {}
+  x: 1101.665801062686
+  y: 402.5176790484617
+- id: Aggregate-on-neighbors_1
+  inputs:
+    graph:
+      boxId: Use-table-as-edges_1
+      id: graph
+  operationId: Aggregate on neighbors
+  parameters:
+    aggregate_age_train: average
+  parametricParameters: {}
+  x: 1106.9488022114588
+  y: 539.7061324085223
+- id: Rename-vertex-attributes_1
+  inputs:
+    graph:
+      boxId: Aggregate-on-neighbors_1
+      id: graph
+  operationId: Rename vertex attributes
+  parameters:
+    change_neighborhood_age_train_average: age_prediction
+  parametricParameters: {}
+  x: 1331.3430108219738
+  y: 546.674896651085
+- id: SQL1_2
+  inputs:
+    input:
+      boxId: Rename-vertex-attributes_1
+      id: graph
+  operationId: SQL1
+  parameters:
+    sql: |
+      select sqrt(avg(power(age_test - age_prediction,2))) as RMSE from vertices
+  parametricParameters: {}
+  x: 1545.9809494929013
+  y: 548.0686494995973
+- id: Compute-centrality_1
+  inputs:
+    graph:
+      boxId: Use-table-as-edges_1
+      id: graph
+  operationId: Compute centrality
+  parameters: {}
+  parametricParameters: {}
+  x: 1033.776799844263
+  y: 739.8356512955751
+- id: Train-linear-regression-model_2
+  inputs:
+    graph:
+      boxId: Compute-centrality_1
+      id: graph
+  operationId: Train linear regression model
+  parameters:
+    features: centrality,data_usage,gender_feature
+    label: age_train
+  parametricParameters: {}
+  x: 1306.4999242336178
+  y: 741.7129997605326
+- id: Predict-with-model_2
+  inputs:
+    graph:
+      boxId: Train-linear-regression-model_2
+      id: graph
+  operationId: Predict with model
+  parameters:
+    name: age_prediction
+  parametricParameters: {}
+  x: 1506.148599042286
+  y: 737.1674150536714
+- id: SQL1_3
+  inputs:
+    input:
+      boxId: Predict-with-model_2
+      id: graph
+  operationId: SQL1
+  parameters:
+    sql: |
+      select sqrt(avg(power(age_test - age_prediction,2))) as RMSE from vertices
+  parametricParameters: {}
+  x: 1704.7351964264683
+  y: 739.9942202853067
+- id: Bundle-vertex-attributes-into-a-Vector_1
+  inputs:
+    graph:
+      boxId: Use-table-as-edges_1
+      id: graph
+  operationId: Bundle vertex attributes into a Vector
+  parameters:
+    elements: data_usage,gender_feature
+    output: feature_vector
+  parametricParameters: {}
+  x: 1022.7486483024359
+  y: 960.2542831692646
+- id: Train-a-GCN-regressor_1
+  inputs:
+    graph:
+      boxId: Bundle-vertex-attributes-into-a-Vector_1
+      id: graph
+  operationId: Train a GCN regressor
+  parameters:
+    iterations: '200'
+    label: age_train
+  parametricParameters: {}
+  x: 1244.3408880244515
+  y: 958.1750482474456
+- id: Predict-with-GCN_1
+  inputs:
+    graph:
+      boxId: Train-a-GCN-regressor_1
+      id: graph
+  operationId: Predict with GCN
+  parameters:
+    label: age_train
+    save_as: age_prediction
+  parametricParameters: {}
+  x: 1540.7647942930985
+  y: 965.5244012954286
+- id: SQL1_4
+  inputs:
+    input:
+      boxId: Predict-with-GCN_1
+      id: graph
+  operationId: SQL1
+  parameters:
+    sql: |
+      select sqrt(avg(power(age_test - age_prediction,2))) as RMSE from vertices
+  parametricParameters: {}
+  x: 1747.2437265532308
+  y: 962.4141113303951
